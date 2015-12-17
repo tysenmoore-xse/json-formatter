@@ -204,6 +204,14 @@ angular.module('jsonFormatter', ['RecursionHelper'])
         return '{' + kvs.join(', ') + ellipsis + '}';
       }
     };
+
+    if (typeof scope.watchOpen == 'undefined') {
+      // Singleton
+      scope.watchOpen = true;
+      scope.$watch('open', function(value) {
+        scope.isOpen = !!scope.open;
+      }, false);    
+    }
   }
 
   return {
