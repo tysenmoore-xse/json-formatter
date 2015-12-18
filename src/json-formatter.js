@@ -46,6 +46,31 @@ angular.module('jsonFormatter', ['RecursionHelper'])
     return str.replace('"', '\"');
   }
 
+  function toHex(val, padLen) {
+
+    if (typeof val == 'undefined') {
+      return "";
+    }
+
+    if (typeof val == 'string') {
+      val = parseInt(val);
+    }
+
+    var sVal = (val < 0 ? (0xFFFFFFFF + val + 1) : val).toString(16);
+
+    if (typeof padLen != 'undefined') {
+
+      if (sVal.length < padLen) {
+        // +1 because the Array gives one less that you want
+        var len = (padLen - sVal.length) + 1;
+        sVal = Array(len).join("0") + sVal;
+      }
+    }
+
+    return sVal.toUpperCase();
+
+  }; // toHex
+
   // From http://stackoverflow.com/a/332429
   function getObjectName(object) {
     if (object === undefined) {
@@ -78,6 +103,9 @@ angular.module('jsonFormatter', ['RecursionHelper'])
 
     if (type === 'string') {
       value = '"' + escapeString(value) + '"';
+    }
+    if (type === 'number') {
+      value = value+' (0x'+toHex(value)+')';
     }
     if (type === 'function'){
 
@@ -197,13 +225,9 @@ angular.module('jsonFormatter', ['RecursionHelper'])
       }
     };
 
-    if (typeof scope.watchOpen == 'undefined') {
-      // Singleton
-      scope.watchOpen = true;
-      scope.$watch('open', function(value) {
-        scope.isOpen = !!scope.open;
-      }, false);    
-    }
+    scope.$watch('open', function(value) {
+      scope.isOpen = !!scope.open;
+    }, false);
   }
 
   return {
