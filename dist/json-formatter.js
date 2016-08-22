@@ -54,6 +54,10 @@ angular.module('jsonFormatter', ['RecursionHelper'])
     return str.replace('"', '\"');
   }
 
+  function isFloat(n) {
+      return Number(n) === n && n % 1 !== 0;
+  }
+
   function toHex(val, padLen) {
 
     if (typeof val == 'undefined') {
@@ -112,7 +116,7 @@ angular.module('jsonFormatter', ['RecursionHelper'])
     if (type === 'string') {
       value = '"' + escapeString(value) + '"';
     }
-    if (type === 'number') {
+    if ((type === 'number') && (!isFloat(value))) {
       value = value+' (0x'+toHex(value)+')';
     }
     if (type === 'function'){
