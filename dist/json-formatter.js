@@ -49,7 +49,7 @@ angular.module('jsonFormatter', ['RecursionHelper'])
   };
 })
 
-.directive('jsonFormatter', ['RecursionHelper', 'JSONFormatterConfig', '$timeout', function jsonFormatterDirective(RecursionHelper, JSONFormatterConfig, $timeout) {
+.directive('jsonFormatter', ['RecursionHelper', 'JSONFormatterConfig', function jsonFormatterDirective(RecursionHelper, JSONFormatterConfig) {
   function escapeString(str) {
     return str.replace('"', '\"');
   }
@@ -238,10 +238,7 @@ angular.module('jsonFormatter', ['RecursionHelper'])
     };
 
     scope.$watch('open', function(value) {
-      // Without the timeout we get digest recursion
-      $timeout(function() {
-        scope.isOpen = !!scope.open;
-      },10);
+      scope.isOpen = !!scope.open;
     }, false);
   }
 
