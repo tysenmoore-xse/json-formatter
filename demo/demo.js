@@ -16,6 +16,45 @@ app.controller('MainCtrl', function ($scope, $http, JSONFormatterConfig) {
     JSONFormatterConfig.hoverPreviewFieldCount = newValue;
   });
 
+  ////http://stackoverflow.com/questions/13523951/how-to-check-the-depth-of-an-object
+  function depthOf( obj ) {
+
+    var level = 1;
+    var key;
+
+    if (!angular.isObject( obj )) {
+        return level;
+    }
+
+    for (key in obj) {
+        if (!obj.hasOwnProperty(key)) {
+            continue;
+        }
+
+        if (angular.isObject( obj[key] )) {
+            var depth = depthOf(obj[key]) + 1;
+            level = Math.max(depth, level);
+        }
+    }
+    return level;
+  } // depthOf
+
+  $scope.iLevels = 1;
+  $scope.testObj = { lvl0: { lvl1: { lvl2: { lvl3: { lvl4: { lvl5: { lvl6: { lvl7: { lvl8: { lvl9: { lvl10: { lvl11: { lvl12: { end:true } } } } } } } } } } } } } };
+  $scope.testObjDepth = depthOf($scope.testObj);
+  $scope.incLevel = function() {
+      $scope.iLevels++;
+      if ($scope.iLevels > $scope.testObjDepth) {
+        $scope.iLevels = $scope.testObjDepth;
+      }
+  }
+  $scope.decLevel = function() {
+      $scope.iLevels--;
+      if ($scope.iLevels < 0) {
+        $scope.iLevels = 0;
+      }
+  }
+
   $scope.undef = undefined;
   $scope.textarea = '{}';
   $scope.complex = {

@@ -4,10 +4,13 @@
   <meta charset="utf-8">
   <title>AngularJS directive demo</title>
 
-  <script src="../bower_components/angular/angular.js"></script>
-  <script src="../bower_components/angular-sanitize/angular-sanitize.js"></script>
-  <link rel="stylesheet" href="../bower_components/bootstrap/dist/css/bootstrap.css">
-  <link rel="stylesheet" href="../dist/json-formatter.min.css"></div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.1/angular.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.1/angular-sanitize.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/2.2.0/ui-bootstrap-tpls.min.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="../dist/json-formatter.min.css">
   <link rel="stylesheet" href="demo.css">
 </head>
 <body ng-controller="MainCtrl">
@@ -42,6 +45,44 @@
         <pre>&lt;json-formatter open="1" json="{my: 'json'}"&gt;&lt;/json-formatter&gt;</pre>
       </p>
       <p><code>open</code> attribute accepts a number that indicated how many levels JSON should be open</p>
+
+      <hr>
+      <div style="background-color: wheat; padding: 10px">
+        <h3 style="color: blue">Branch Specific Tests</h3>
+        <hr>
+        <h4>Deep JSON</h4>
+        <button class="btn btn-default" style="float: left; margin-right: 5px" type="button" ng-click="iLevels=1"
+            uib-tooltip="Collapse"
+            tooltip-placement="left"
+            tooltip-popup-delay="500">
+            <i class="fa fa-solo fa-compress"></i>
+        </button>
+        <button class="btn btn-default" style="float: left; margin-right: 5px" type="button" ng-click="decLevel()"
+            uib-tooltip="Collapse One Level ({{iLevels}})"
+            tooltip-placement="left"
+            tooltip-popup-delay="500">
+            <i class="fa fa-solo fa-minus"></i>
+        </button>
+
+        <button class="btn btn-default" style="float: left; margin-right: 5px" type="button" ng-click="incLevel()"
+            uib-tooltip="Expand One Level ({{iLevels}})"
+            tooltip-placement="left"
+            tooltip-popup-delay="500">
+            <i class="fa fa-solo fa-plus"></i>
+        </button>
+        <button class="btn btn-default" style="float: left; margin-right: 5px" type="button" ng-click="iLevels=testObjDepth"
+            uib-tooltip="Expand ({{testObjDepth}})"
+            tooltip-placement="left"
+            tooltip-popup-delay="500">
+            <i class="fa fa-solo fa-expand"></i>
+        </button>
+        <h5 style="float: left; margin-left: 10px">(Depth = {{iLevels}} of {{testObjDepth}})</h5>
+        <div class="result" style="clear: both; background-color: white">
+          <json-formatter json="testObj" open="iLevels"></json-formatter>
+        </div>
+
+      </div>
+      <hr>
 
       <h4>Configuration</h4>
       <p>You can set following configurations via <code>JSONFormatterConfig</code> provider.</p>
@@ -252,7 +293,7 @@
 </div>
 
 </div>
-<script src="../dist/json-formatter.min.js"></script>
+<script src="../dist/json-formatter.js"></script>
 <script src="demo.js"></script>
 </body>
 </html>
