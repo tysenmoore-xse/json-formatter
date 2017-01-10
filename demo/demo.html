@@ -50,6 +50,7 @@
       <div style="background-color: wheat; padding: 10px">
         <h3 style="color: blue">Branch Specific Tests</h3>
         <hr>
+
         <h4>Deep JSON</h4>
         <button class="btn btn-default" style="float: left; margin-right: 5px" type="button" ng-click="iLevels=1"
             uib-tooltip="Collapse"
@@ -79,6 +80,11 @@
         <h5 style="float: left; margin-left: 10px">(Depth = {{iLevels}} of {{testObjDepth}})</h5>
         <div class="result" style="clear: both; background-color: white">
           <json-formatter json="testObj" open="iLevels"></json-formatter>
+        </div>
+
+        <h4>Show Hex</h4>
+        <div class="result" style="clear: both; background-color: white">
+          <json-formatter json="complex" open="1" show-hex="true"></json-formatter>
         </div>
 
       </div>

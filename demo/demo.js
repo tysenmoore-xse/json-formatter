@@ -40,7 +40,7 @@ app.controller('MainCtrl', function ($scope, $http, JSONFormatterConfig) {
   } // depthOf
 
   $scope.iLevels = 1;
-  $scope.testObj = { lvl0: { lvl1: { lvl2: { lvl3: { lvl4: { lvl5: { lvl6: { lvl7: { lvl8: { lvl9: { lvl10: { lvl11: { lvl12: { end:true } } } } } } } } } } } } } };
+  $scope.testObj = { lvl0: { num: 12, lvl1: { lvl2: { lvl3: { lvl4: { lvl5: { lvl6: { lvl7: { lvl8: { lvl9: { lvl10: { lvl11: { lvl12: { end:true } } } } } } } } } } } } } };
   $scope.testObjDepth = depthOf($scope.testObj);
   $scope.incLevel = function() {
       $scope.iLevels++;
