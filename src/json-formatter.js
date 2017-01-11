@@ -1,259 +1,83 @@
+/*!
+ * jsonformatter
+ *
+ * Version: 0.4.1 - 2015-12-03T03:38:59.925Z
+ * License: MIT
+ */
+
 'use strict';
 
-angular.module('jsonFormatter', ['RecursionHelper'])
+var JSONFormatter = require('json-formatter-js');
 
-.provider('JSONFormatterConfig', function JSONFormatterConfigProvider() {
+//(function() { // IIFE
 
-  // Default values for hover preview config
-  var hoverPreviewEnabled = false;
-  var hoverPreviewArrayCount = 100;
-  var hoverPreviewFieldCount = 5;
+angular.module('jsonFormatter', [ ])
+    .directive('jsonFormatter', jsonFormatterDirective);
 
-  return {
-    get hoverPreviewEnabled() {
-      return hoverPreviewEnabled;
-    },
-    set hoverPreviewEnabled(value) {
-     hoverPreviewEnabled = !!value;
-    },
+function jsonFormatterDirective() {
 
-    get hoverPreviewArrayCount() {
-      return hoverPreviewArrayCount;
-    },
-    set hoverPreviewArrayCount(value) {
-      hoverPreviewArrayCount = parseInt(value, 10);
-    },
+    // http://stackoverflow.com/questions/13523951/how-to-check-the-depth-of-an-object
+    function _depthOf(obj) {
 
-    get hoverPreviewFieldCount() {
-      return hoverPreviewFieldCount;
-    },
-    set hoverPreviewFieldCount(value) {
-      hoverPreviewFieldCount = parseInt(value, 10);
-    },
+        var depth;
+        var level = 1;
+        var key;
 
-    $get: function () {
-      return {
-        hoverPreviewEnabled: hoverPreviewEnabled,
-        hoverPreviewArrayCount: hoverPreviewArrayCount,
-        hoverPreviewFieldCount: hoverPreviewFieldCount
-      };
-    }
-  };
-})
-
-.directive('jsonFormatter', ['RecursionHelper', 'JSONFormatterConfig', function jsonFormatterDirective(RecursionHelper, JSONFormatterConfig) {
-  function escapeString(str) {
-    return str.replace('"', '\"');
-  }
-
-  function isFloat(n) {
-      return Number(n) === n && n % 1 !== 0;
-  }
-
-  function toHex(val, padLen) {
-
-    if (typeof val == 'undefined') {
-      return "";
-    }
-
-    if (typeof val == 'string') {
-      val = parseInt(val);
-    }
-
-    var sVal = (val < 0 ? (0xFFFFFFFF + val + 1) : val).toString(16);
-
-    if (typeof padLen != 'undefined') {
-
-      if (sVal.length < padLen) {
-        // +1 because the Array gives one less that you want
-        var len = (padLen - sVal.length) + 1;
-        sVal = Array(len).join("0") + sVal;
-      }
-    }
-
-    return sVal.toUpperCase();
-
-  }; // toHex
-
-  // From http://stackoverflow.com/a/332429
-  function getObjectName(object) {
-    if (object === undefined) {
-      return '';
-    }
-    if (object === null) {
-      return 'Object';
-    }
-    if (typeof object === 'object' && !object.constructor) {
-        return 'Object';
-    }
-    var funcNameRegex = /function (.{1,})\(/;
-    var results = (funcNameRegex).exec((object).constructor.toString());
-    if (results && results.length > 1) {
-      return results[1];
-    } else {
-      return '';
-    }
-  }
-
-  function getType(object) {
-    if (object === null) { return 'null'; }
-    return typeof object;
-  }
-
-  function getValuePreview (object, value) {
-    var type = getType(object);
-
-    if (type === 'null' || type === 'undefined') { return type; }
-
-    if (type === 'string') {
-      value = '"' + escapeString(value) + '"';
-    }
-    if ((type === 'number') && (!isFloat(value))) {
-      value = value+' (0x'+toHex(value)+')';
-    }
-    if (type === 'function'){
-
-      // Remove content of the function
-      return object.toString()
-          .replace(/[\r\n]/g, '')
-          .replace(/\{.*\}/, '') + '{…}';
-
-    }
-    return value;
-  }
-
-  function getPreview(object) {
-    var value = '';
-    if (angular.isObject(object)) {
-      value = getObjectName(object);
-      if (angular.isArray(object))
-        value += '[' + object.length + ']';
-    } else {
-      value = getValuePreview(object, object);
-    }
-    return value;
-  }
-
-  function link(scope) {
-    scope.isArray = function () {
-      return angular.isArray(scope.json);
-    };
-
-    scope.isObject = function() {
-      return angular.isObject(scope.json);
-    };
-
-    scope.getKeys = function (){
-      if (scope.isObject()) {
-        return Object.keys(scope.json).map(function(key) {
-          if (key === '') { return '""'; }
-          return key;
-        });
-      }
-    };
-    scope.type = getType(scope.json);
-    scope.hasKey = typeof scope.key !== 'undefined';
-    scope.getConstructorName = function(){
-      return getObjectName(scope.json);
-    };
-
-    if (scope.type === 'string'){
-
-      // Add custom type for date
-      if((new Date(scope.json)).toString() !== 'Invalid Date') {
-        scope.isDate = true;
-      }
-
-      // Add custom type for URLs
-      if (scope.json.indexOf('http') === 0) {
-        scope.isUrl = true;
-      }
-    }
-
-    scope.isEmptyObject = function () {
-      return scope.getKeys() && !scope.getKeys().length &&
-        scope.isOpen && !scope.isArray();
-    };
-
-
-    // If 'open' attribute is present
-    scope.isOpen = !!scope.open;
-    scope.toggleOpen = function () {
-      scope.isOpen = !scope.isOpen;
-    };
-    scope.childrenOpen = function () {
-      if (scope.open > 1){
-        return scope.open - 1;
-      }
-      return 0;
-    };
-
-    scope.openLink = function (isUrl) {
-      if(isUrl) {
-        window.location.href = scope.json;
-      }
-    };
-
-    scope.parseValue = function (value){
-      return getValuePreview(scope.json, value);
-    };
-
-    scope.showThumbnail = function () {
-      return !!JSONFormatterConfig.hoverPreviewEnabled && scope.isObject() && !scope.isOpen;
-    };
-
-    scope.getThumbnail = function () {
-      if (scope.isArray()) {
-
-        // if array length is greater then 100 it shows "Array[101]"
-        if (scope.json.length > JSONFormatterConfig.hoverPreviewArrayCount) {
-          return 'Array[' + scope.json.length + ']';
-        } else {
-          return '[' + scope.json.map(getPreview).join(', ') + ']';
+        if ( !angular.isObject(obj) ) {
+            return level;
         }
-      } else {
 
-        var keys = scope.getKeys();
+        for ( key in obj ) {
+            if ( !obj.hasOwnProperty(key) ) {
+                continue;
+            }
 
-        // the first five keys (like Chrome Developer Tool)
-        var narrowKeys = keys.slice(0, JSONFormatterConfig.hoverPreviewFieldCount);
+            if ( angular.isObject(obj[key]) ) {
+                depth = _depthOf(obj[key]) + 1;
+                level = Math.max(depth, level);
+            }
+        }
+        return level;
 
-        // json value schematic information
-        var kvs = narrowKeys
-          .map(function (key) { return key + ':' + getPreview(scope.json[key]); });
+    } // _depthOf
 
-        // if keys count greater then 5 then show ellipsis
-        var ellipsis = keys.length >= 5 ? '…' : '';
+    return {
+        restrict:   'E',
+        replace:    true,
+        scope: {
+            json:   '=',
+            open:   '='
+        },
+        link: function( scope, elem ) {
 
-        return '{' + kvs.join(', ') + ellipsis + '}';
-      }
+            const formatter = new JSONFormatter( scope.json );
+            var depth = _depthOf( scope.json );
+
+            function _setDepth() {
+
+                if ( scope.open < 0 ) {
+                    scope.open = 0;
+                }
+                else if ( scope.open > depth ) {
+                    scope.open = depth;
+                }
+
+                formatter.openAtDepth( scope.open );
+
+            } // _setDepth
+
+            elem.replaceWith( formatter.render() );
+
+            if ( scope.open ) {
+                _setDepth();
+            }
+
+            scope.$watch('open', function(value) {
+                _setDepth();
+            }, false);
+
+        } // link
     };
-
-    scope.$watch('open', function(value) {
-      scope.isOpen = !!scope.open;
-    }, false);
-  }
-
-  return {
-    templateUrl: 'json-formatter.html',
-    restrict: 'E',
-    replace: true,
-    scope: {
-      json: '=',
-      key: '=',
-      open: '='
-    },
-    compile: function(element) {
-
-      // Use the compile function from the RecursionHelper,
-      // And return the linking function(s) which it returns
-      return RecursionHelper.compile(element, link);
-    }
-  };
-}]);
-
-// Export to CommonJS style imports. Exporting this string makes this valid:
-// angular.module('myApp', [require('jsonformatter')]);
-if (typeof module === 'object') {
-  module.exports = 'jsonFormatter';
 }
+
+//})(); // IIFE
